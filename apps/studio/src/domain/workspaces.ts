@@ -173,6 +173,12 @@ export function createWorkspace(
   };
 }
 
+export function createDefaultWorkspace(defaultSettings: PlatformSettings): WorkspaceDocument {
+  return createWorkspace("Default", "default workspace", defaultSettings, {
+    id: "workspace-default",
+  });
+}
+
 export function migrateWorkspaces(
   raw: unknown,
   fallbackFlow: FlowDocument,

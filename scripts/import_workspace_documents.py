@@ -11,7 +11,7 @@ from voice_agent_runtime.repository import RuntimeRepository
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Import a relay.workspaces.v1 JSON backup into PostgreSQL.",
+        description="Import a Voice Agent Studio workspace JSON backup into PostgreSQL.",
     )
     parser.add_argument("--file", required=True, type=Path)
     parser.add_argument(

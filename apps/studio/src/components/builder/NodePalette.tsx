@@ -51,7 +51,7 @@ export function NodePalette({ onAdd, hasStart }: { onAdd: (template: NodeTemplat
   );
 
   const onDragStart = (event: React.DragEvent, template: NodeTemplate) => {
-    event.dataTransfer.setData("application/relay-node", JSON.stringify(template));
+    event.dataTransfer.setData("application/voice-agent-studio-node", JSON.stringify(template));
     event.dataTransfer.effectAllowed = "move";
   };
 

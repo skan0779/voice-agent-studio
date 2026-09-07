@@ -286,7 +286,7 @@ export function FlowBuilder({
   const onDrop = (event: React.DragEvent) => {
     event.preventDefault();
     try {
-      const template = JSON.parse(event.dataTransfer.getData("application/relay-node")) as NodeTemplate;
+      const template = JSON.parse(event.dataTransfer.getData("application/voice-agent-studio-node")) as NodeTemplate;
       if (template.kind) createNode(template, screenToFlowPosition({ x: event.clientX, y: event.clientY }));
     } catch {
       /* Ignore drops from unrelated sources. */

@@ -7,7 +7,7 @@ Voice Agent Studio is a visual workspace for designing, deploying, and monitorin
 The local stack includes PostgreSQL, database migrations, Runtime, Research Agent, and Studio.
 
 ```bash
-test -f .env || cp .env.example .env
+cp .env.example .env
 npm run local:up
 ```
 
@@ -18,7 +18,7 @@ npm run local:logs   # Follow service logs
 npm run local:down   # Stop services
 ```
 
-Replace `RUNTIME_SECRET_KEY` in `.env` before storing provider credentials. PostgreSQL data is kept in a named Docker volume when the stack is stopped. The repository does not seed a default workspace or bundled domain-specific data, so a new database starts empty.
+Replace `RUNTIME_SECRET_KEY` in `.env` before storing provider credentials. PostgreSQL data is kept in a named Docker volume when the stack is stopped. On first launch, Studio creates an empty `Default` workspace; it does not seed agents or bundled domain-specific data.
 
 Run the local quality checks before committing changes:
 

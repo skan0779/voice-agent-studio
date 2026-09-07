@@ -72,7 +72,7 @@ export interface SidebarCounts {
   reports: number;
 }
 
-const SIDEBAR_COLLAPSED_KEY = "relay.sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "voice-agent-studio.sidebar-collapsed";
 
 export function Sidebar({
   active,

@@ -4,6 +4,7 @@ import type { FlowDocument, PlatformSettings, ToolDefinition } from "./domain/fl
 import { createAgentFlow, duplicateAgentFlow, migrationFallbackFlow } from "./domain/agents";
 import {
   createWorkspace,
+  createDefaultWorkspace,
   duplicateWorkspace,
   migrateWorkspaces,
   type Contact,
@@ -47,8 +48,9 @@ import {
   type ResearchReportEvent,
 } from "./lib/runtimeApi";
 
-const ACTIVE_WORKSPACE_KEY = "relay.active-workspace.v1";
-const WORKSPACE_SECRETS_KEY = "relay.workspace-secrets.v1";
+const ACTIVE_WORKSPACE_KEY = "voice-agent-studio.active-workspace.v1";
+const WORKSPACE_SECRETS_KEY = "voice-agent-studio.workspace-secrets.v1";
+const THEME_KEY = "voice-agent-studio.theme";
 
 type WorkspaceLoadStatus = "loading" | "ready" | "error";
 type WorkspaceSecrets = Record<string, { twilioAuthToken?: unknown; openaiApiKey?: unknown }>;
@@ -100,7 +102,7 @@ function workspaceSnapshot(workspaces: WorkspaceDocument[]) {
 }
 
 export default function App() {
-  const [section, setSection] = useState<SectionId>("builder");
+  const [section, setSection] = useState<SectionId>("overview");
   const [workspaces, setWorkspaces] = useState<WorkspaceDocument[]>([]);
   const [workspaceLoadStatus, setWorkspaceLoadStatus] = useState<WorkspaceLoadStatus>("loading");
   const [workspaceLoadError, setWorkspaceLoadError] = useState<string | null>(null);
@@ -109,7 +111,7 @@ export default function App() {
     localStorage.getItem(ACTIVE_WORKSPACE_KEY),
   );
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
-  const [dark, setDark] = useState(() => localStorage.getItem("relay.theme") === "dark");
+  const [dark, setDark] = useState(() => localStorage.getItem(THEME_KEY) === "dark");
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -177,9 +179,16 @@ export default function App() {
         migrationFallbackFlow,
         defaultPlatformSettings,
       );
-      const hydrated = hydrateWorkspaceSecrets(migrated);
+      const loadedWorkspaces = migrated.length > 0 ? migrated : [createDefaultWorkspace(defaultPlatformSettings)];
+      if (migrated.length === 0) await saveWorkspaceDocument(loadedWorkspaces[0]);
+      const hydrated = hydrateWorkspaceSecrets(loadedWorkspaces);
+      const storedWorkspaceId = localStorage.getItem(ACTIVE_WORKSPACE_KEY);
+      const initialWorkspace = hydrated.find((workspace) => workspace.id === storedWorkspaceId) ?? hydrated[0];
       lastWorkspaceSnapshotRef.current = workspaceSnapshot(hydrated);
       setWorkspaces(hydrated);
+      setActiveWorkspaceId(initialWorkspace.id);
+      setActiveAgentId(null);
+      setSection("overview");
       setWorkspaceLoadStatus("ready");
     } catch (error) {
       setWorkspaceLoadError(error instanceof Error ? error.message : "Could not load workspaces.");
@@ -243,7 +252,7 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("relay.theme", dark ? "dark" : "light");
+    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
   }, [dark]);
 
   useEffect(() => {

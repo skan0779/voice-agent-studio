@@ -6,7 +6,13 @@ import {
   fixtureStateSchemas,
   fixtureTools,
 } from "../test/fixtures";
-import { createWorkspace, duplicateWorkspace, formatContactPhoneNumber, migrateWorkspaces } from "./workspaces";
+import {
+  createDefaultWorkspace,
+  createWorkspace,
+  duplicateWorkspace,
+  formatContactPhoneNumber,
+  migrateWorkspaces,
+} from "./workspaces";
 
 describe("workspaces", () => {
   it("formats Korean mobile phone numbers without changing international numbers", () => {
@@ -22,6 +28,22 @@ describe("workspaces", () => {
     });
 
     expect(workspace.name).toBe("Example Workspace");
+    expect(workspace.agents).toEqual([]);
+    expect(workspace.tools).toEqual([]);
+    expect(workspace.functions).toEqual([]);
+    expect(workspace.stateSchemas).toEqual([]);
+    expect(workspace.dataAssets).toEqual([]);
+    expect(workspace.contacts).toEqual([]);
+  });
+
+  it("creates a stable empty default workspace", () => {
+    const workspace = createDefaultWorkspace(fixturePlatformSettings);
+
+    expect(workspace).toMatchObject({
+      id: "workspace-default",
+      name: "Default",
+      description: "default workspace",
+    });
     expect(workspace.agents).toEqual([]);
     expect(workspace.tools).toEqual([]);
     expect(workspace.functions).toEqual([]);
