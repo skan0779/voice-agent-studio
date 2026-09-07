@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/skan0779/voice-agent-studio/main/contracts/flow.schema.json",
+  "title": "Voice Agent Studio FlowSpec 2.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "version",
+    "status",
+    "entry_node_id",
+    "updated_at",
+    "start",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "description": { "type": "string" },
+    "state_schema_id": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["draft", "published"] },
+    "entry_node_id": { "type": "string", "minLength": 1 },
+    "updated_at": { "type": "string" },
+    "start": { "$ref": "#/$defs/start" },
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "start": {
+      "type": "object",
+      "required": ["language", "initial_input_gate_ms", "session_update"],
+      "properties": {
+        "language": { "enum": ["ko", "en"] },
+        "initial_input_gate_ms": { "type": "integer", "minimum": 0, "maximum": 30000 },
+        "session_update": {
+          "type": "object",
+          "required": ["type", "model", "instructions", "output_modalities", "audio"],
+          "properties": {
+            "type": { "const": "realtime" },
+            "model": { "const": "gpt-realtime-2.1" },
+            "instructions": { "type": "string" },
+            "output_modalities": {
+              "type": "array",
+              "prefixItems": [{ "const": "audio" }],
+              "minItems": 1,
+              "maxItems": 1
+            },
+            "audio": {
+              "type": "object",
+              "required": ["input", "output"],
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": ["format", "transcription", "turn_detection"],
+                  "properties": {
+                    "format": { "$ref": "#/$defs/audio_format" },
+                    "transcription": {
+                      "oneOf": [
+                        { "type": "null" },
+                        {
+                          "type": "object",
+                          "required": ["model", "language", "prompt"],
+                          "properties": {
+                            "model": { "enum": ["gpt-transcribe", "gpt-live-transcribe"] },
+                            "language": { "type": "string", "minLength": 2 },
+                            "prompt": { "type": "string" }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "turn_detection": { "$ref": "#/$defs/turn_detection" }
+                  },
+                  "additionalProperties": false
+                },
+                "output": {
+                  "type": "object",
+                  "required": ["format", "voice", "speed"],
+                  "properties": {
+                    "format": { "$ref": "#/$defs/audio_format" },
+                    "voice": { "enum": ["marin", "cedar", "coral", "sage"] },
+                    "speed": { "type": "number", "minimum": 0.25, "maximum": 1.5 }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "audio_format": {
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "const": "audio/pcmu" } },
+      "additionalProperties": false
+    },
+    "turn_detection": {
+      "type": "object",
+      "required": [
+        "type",
+        "threshold",
+        "prefix_padding_ms",
+        "silence_duration_ms",
+        "eagerness",
+        "create_response",
+        "interrupt_response"
+      ],
+      "properties": {
+        "type": { "enum": ["server_vad", "semantic_vad"] },
+        "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "prefix_padding_ms": { "type": "integer", "minimum": 0 },
+        "silence_duration_ms": { "type": "integer", "minimum": 100 },
+        "eagerness": { "enum": ["low", "medium", "high", "auto"] },
+        "create_response": { "type": "boolean" },
+        "interrupt_response": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "name",
+        "description",
+        "objective",
+        "instructions",
+        "response_mode",
+        "tool_choice",
+        "tool_ids",
+        "position"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["start", "node", "tool", "end"] },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "objective": { "type": "string" },
+        "instructions": { "type": "string" },
+        "response_mode": { "enum": ["manual", "automatic", "none"] },
+        "tool_choice": { "enum": ["none", "auto", "required"] },
+        "tool_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "tool_input_bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool_input_binding" }
+        },
+        "tool_function_bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool_function_binding" }
+        },
+        "runtime": { "$ref": "#/$defs/runtime" },
+        "tool": { "$ref": "#/$defs/tool" },
+        "end": { "$ref": "#/$defs/end" },
+        "position": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "response_mode",
+        "tool_choice",
+        "parallel_tool_calls",
+        "output_modalities",
+        "follow_up_audio",
+        "speed_override",
+        "vad_silence_override_ms",
+        "max_output_tokens"
+      ],
+      "properties": {
+        "response_mode": { "enum": ["manual", "automatic", "none"] },
+        "tool_choice": { "enum": ["none", "auto", "required"] },
+        "parallel_tool_calls": { "type": "boolean" },
+        "output_modalities": {
+          "type": "array",
+          "prefixItems": [{ "enum": ["audio", "text"] }],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "follow_up_audio": { "type": "boolean" },
+        "speed_override": { "type": ["number", "null"], "minimum": 0.25, "maximum": 1.5 },
+        "vad_silence_override_ms": { "type": ["integer", "null"], "minimum": 100 },
+        "max_output_tokens": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "tool": {
+      "type": "object",
+      "required": ["tool_id", "execution", "timeout_ms", "retry_count"],
+      "properties": {
+        "tool_id": { "type": "string" },
+        "execution": { "enum": ["runtime", "model"] },
+        "timeout_ms": { "type": "integer", "minimum": 100 },
+        "retry_count": { "type": "integer", "minimum": 0, "maximum": 5 }
+      },
+      "additionalProperties": false
+    },
+    "tool_function_binding": {
+      "type": "object",
+      "required": ["tool_id", "function_id", "input_mapping"],
+      "properties": {
+        "tool_id": { "type": "string", "minLength": 1 },
+        "function_id": { "type": "string", "minLength": 1 },
+        "input_mapping": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "tool_input_binding": {
+      "type": "object",
+      "required": ["tool_id", "input_mapping"],
+      "properties": {
+        "tool_id": { "type": "string", "minLength": 1 },
+        "input_mapping": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "end": {
+      "type": "object",
+      "required": [
+        "final_message",
+        "wait_for_playback_mark",
+        "playback_timeout_ms",
+        "fallback_grace_ms",
+        "save_transcript",
+        "trigger_research_agent",
+        "end_reason"
+      ],
+      "properties": {
+        "final_message": { "type": "string" },
+        "wait_for_playback_mark": { "type": "boolean" },
+        "playback_timeout_ms": { "type": "integer", "minimum": 0 },
+        "fallback_grace_ms": { "type": "integer", "minimum": 0 },
+        "save_transcript": { "type": "boolean" },
+        "trigger_research_agent": { "type": "boolean" },
+        "end_reason": { "enum": ["completed", "declined", "timeout", "safety"] }
+      },
+      "additionalProperties": false
+    },
+    "condition_rule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["id", "kind", "path", "comparator", "value"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "state" },
+            "path": { "type": "string", "minLength": 1 },
+            "comparator": {
+              "enum": [
+                "equals",
+                "not_equals",
+                "contains",
+                "greater_than",
+                "greater_or_equal",
+                "less_than",
+                "less_or_equal"
+              ]
+            },
+            "value": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "timeout_ms"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "timeout" },
+            "timeout_ms": { "type": "integer", "minimum": 100 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "required": ["logic", "rules"],
+      "properties": {
+        "logic": { "enum": ["all", "any"] },
+        "rules": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/condition_rule" } }
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "source", "target", "name", "route_type", "priority"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "route_type": { "enum": ["always", "condition", "fallback"] },
+        "condition": { "$ref": "#/$defs/condition" },
+        "priority": { "type": "integer", "minimum": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "route_type": { "const": "condition" } } },
+          "then": { "required": ["condition"] }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

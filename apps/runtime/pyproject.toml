@@ -1,0 +1,41 @@
+[project]
+name = "voice-agent-studio-runtime"
+version = "0.1.0"
+description = "Shared FastAPI runtime for deployed Voice Agent Studio flows"
+authors = [{ name = "skan0779" }]
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.16.5",
+    "cryptography>=46.0.5",
+    "fastapi>=0.141.1",
+    "openai>=2.53.0",
+    "psycopg[binary]>=3.2.10",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.43",
+    "twilio>=9.10.9",
+    "uvicorn>=0.52.1",
+    "voice-agent-studio-persistence",
+    "websockets>=15.0.1",
+]
+
+[tool.uv.sources]
+voice-agent-studio-persistence = { path = "../../packages/persistence", editable = true }
+
+[dependency-groups]
+dev = ["ruff>=0.12.11"]
+
+[project.urls]
+Homepage = "https://github.com/skan0779/voice-agent-studio"
+Repository = "https://github.com/skan0779/voice-agent-studio"
+
+[project.scripts]
+voice-agent-studio-runtime = "voice_agent_runtime.main:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/voice_agent_runtime"]

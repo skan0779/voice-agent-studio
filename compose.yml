@@ -1,0 +1,87 @@
+name: voice-agent-studio
+
+x-runtime-build: &runtime-build
+  context: .
+  dockerfile: deploy/Dockerfile.runtime
+
+x-database-environment: &database-environment
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-voice_agent_studio}:${POSTGRES_PASSWORD:-local-voice-agent-studio-password}@postgres:5432/${POSTGRES_DB:-voice_agent_studio}
+  RUNTIME_SECRET_KEY: ${RUNTIME_SECRET_KEY:-local-development-only-change-me}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-voice_agent_studio}
+      POSTGRES_USER: ${POSTGRES_USER:-voice_agent_studio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-voice-agent-studio-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - voice-agent-studio-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  migrate:
+    build: *runtime-build
+    environment:
+      <<: *database-environment
+    command: ["alembic", "-c", "/app/alembic.ini", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  runtime:
+    build: *runtime-build
+    restart: unless-stopped
+    environment:
+      <<: *database-environment
+      ALLOW_UNSAFE_CODE_ACTIONS: ${ALLOW_UNSAFE_CODE_ACTIONS:-false}
+      RESEARCH_AGENT_URL: http://research:8081
+      STUDIO_ORIGINS: ${STUDIO_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      research:
+        condition: service_healthy
+
+  research:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.research
+    restart: unless-stopped
+    environment:
+      <<: *database-environment
+      RESEARCH_MODEL: ${RESEARCH_MODEL:-gpt-5.6-terra}
+      STUDIO_ORIGINS: ${STUDIO_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
+    ports:
+      - "8081:8081"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  studio:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.studio
+      args:
+        VITE_RUNTIME_API_URL: http://localhost:8080
+        VITE_RESEARCH_API_URL: http://localhost:8081
+    restart: unless-stopped
+    ports:
+      - "4173:80"
+    depends_on:
+      runtime:
+        condition: service_healthy
+      research:
+        condition: service_healthy
+
+volumes:
+  voice-agent-studio-postgres-data:

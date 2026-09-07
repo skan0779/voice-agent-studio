@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+  <title id="title">Voice Agent Studio</title>
+  <desc id="desc">Connected flow nodes surrounding a voice waveform</desc>
+  <defs>
+    <linearGradient id="surface" x1="5" y1="5" x2="43" y2="43" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="42" height="42" rx="13" fill="url(#surface)"/>
+  <path d="M12 24h4l2.2-7 4.1 14 3.7-12 2.5 8 2-6 1.7 3H36" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="12" cy="24" r="2.25" fill="#BAE6FD"/>
+  <circle cx="36" cy="24" r="2.25" fill="#DDD6FE"/>
+</svg>

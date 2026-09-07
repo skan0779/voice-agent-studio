@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+!.env.production.example
+backup/
+data/
+node_modules/
+dist/
+.venv/
+*.lock
+*.dump
+LICENSE

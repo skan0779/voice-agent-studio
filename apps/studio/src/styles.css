@@ -1,0 +1,325 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  font-family:
+    Pretendard,
+    "Pretendard Variable",
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --app-bg: #f5f7fa;
+  --sidebar: #f8fafc;
+  --surface: #ffffff;
+  --surface-subtle: #f7f8fa;
+  --surface-hover: #f1f4f8;
+  --nav-active: #eaf0f9;
+  --text: #111827;
+  --text-secondary: #475569;
+  --text-muted: #7b8798;
+  --border: #e3e8ef;
+  --border-strong: #cad3df;
+  --primary: #172554;
+  --primary-hover: #1e3a8a;
+  --ring: #3b82f6;
+  --blue: #2563eb;
+  --blue-soft: #eff6ff;
+  --blue-border: #bfdbfe;
+  --green: #047857;
+  --green-soft: #ecfdf5;
+  --green-border: #a7f3d0;
+  --amber: #b45309;
+  --amber-soft: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #dc2626;
+  --red-soft: #fef2f2;
+  --red-border: #fecaca;
+  --purple: #7c3aed;
+  --purple-soft: #f5f3ff;
+  --purple-border: #ddd6fe;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --handle: #64748b;
+  --edge: #94a3b8;
+  --canvas-dot: #cbd5e1;
+  --minimap-mask: rgba(241, 245, 249, 0.72);
+  --tooltip: #172033;
+  --console: #0f172a;
+  --console-text: #94a3b8;
+}
+
+.dark {
+  color-scheme: dark;
+  --app-bg: #0b1018;
+  --sidebar: #0f1621;
+  --surface: #121a26;
+  --surface-subtle: #17202d;
+  --surface-hover: #1b2634;
+  --nav-active: #1b2940;
+  --text: #f1f5f9;
+  --text-secondary: #b6c2d1;
+  --text-muted: #7f8da1;
+  --border: #243143;
+  --border-strong: #35445a;
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --ring: #60a5fa;
+  --blue: #60a5fa;
+  --blue-soft: #152744;
+  --blue-border: #254a7d;
+  --green: #34d399;
+  --green-soft: #102d28;
+  --green-border: #1d5c4f;
+  --amber: #fbbf24;
+  --amber-soft: #352812;
+  --amber-border: #6c5016;
+  --red: #f87171;
+  --red-soft: #361b22;
+  --red-border: #6e2a37;
+  --purple: #c4b5fd;
+  --purple-soft: #281f48;
+  --purple-border: #51428a;
+  --danger: #f87171;
+  --danger-soft: #361b22;
+  --handle: #94a3b8;
+  --edge: #64748b;
+  --canvas-dot: #2a394d;
+  --minimap-mask: rgba(11, 16, 24, 0.75);
+  --tooltip: #e2e8f0;
+  --console: #070b12;
+  --console-text: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 375px;
+  background: var(--app-bg);
+  overflow: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: #bfdbfe;
+  color: #172554;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+  background-clip: padding-box;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.035);
+}
+
+.metric-blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.metric-green {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.metric-purple {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+.metric-amber {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.tool-icon-capture {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+.tool-icon-http {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.tool-icon-builtin {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.trace-green {
+  color: var(--green);
+}
+.trace-blue {
+  color: var(--blue);
+}
+.trace-purple {
+  color: var(--purple);
+}
+.trace-amber {
+  color: var(--amber);
+}
+
+.react-flow {
+  background: var(--app-bg);
+}
+
+.react-flow__node {
+  border: 0;
+  background: transparent;
+}
+
+.react-flow__node:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.react-flow__edge-path {
+  stroke: var(--edge);
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--blue);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edgeupdater {
+  fill: var(--blue) !important;
+  stroke: var(--surface) !important;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edgeupdater-target {
+  fill: transparent !important;
+  stroke: transparent !important;
+  pointer-events: all;
+  cursor: move;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--surface);
+}
+
+.react-flow__controls {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 0.08);
+}
+
+.react-flow__controls-button {
+  width: 30px;
+  height: 30px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  fill: currentColor;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--surface-hover);
+}
+
+.react-flow__minimap {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 4px 14px rgb(15 23 42 / 0.07);
+}
+
+.node-runtime-active {
+  animation: runtime-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes runtime-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--green) 20%, transparent),
+      0 6px 18px rgb(15 23 42 / 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px color-mix(in srgb, var(--green) 12%, transparent),
+      0 8px 22px rgb(15 23 42 / 0.12);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    min-width: 320px;
+  }
+  .react-flow__minimap {
+    display: none;
+  }
+}

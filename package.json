@@ -1,0 +1,48 @@
+{
+  "name": "voice-agent-studio",
+  "version": "0.1.0",
+  "private": true,
+  "author": "skan0779",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skan0779/voice-agent-studio.git"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @voice-agent-studio/studio",
+    "runtime:dev": "uv run --project apps/runtime uvicorn voice_agent_runtime.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir apps/runtime/src --reload-dir ../src",
+    "runtime:test": "uv run --project apps/runtime python -m unittest discover -s apps/runtime/tests -v",
+    "research:dev": "uv run --project apps/research uvicorn research_agent.main:app --host 0.0.0.0 --port 8081 --reload --reload-dir apps/research/src",
+    "research:test": "uv run --project apps/research python -m unittest discover -s apps/research/tests -v",
+    "local:up": "docker compose up --build -d",
+    "local:down": "docker compose down",
+    "local:logs": "docker compose logs -f",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose stop postgres",
+    "db:migrate": "uv run --project apps/runtime alembic -c alembic.ini upgrade head",
+    "db:status": "uv run --project apps/runtime alembic -c alembic.ini current",
+    "db:import-workspaces": "uv run --project apps/runtime python scripts/import_workspace_documents.py",
+    "build": "npm run build --workspace @voice-agent-studio/studio",
+    "test": "npm run test --workspace @voice-agent-studio/studio",
+    "typecheck": "npm run typecheck --workspace @voice-agent-studio/studio",
+    "lint": "npm run lint:studio && npm run lint:python",
+    "lint:studio": "npm run lint --workspace @voice-agent-studio/studio",
+    "lint:python": "uv run --project apps/runtime ruff check apps/runtime/src apps/runtime/tests apps/research/src apps/research/tests packages/persistence/src migrations scripts",
+    "format": "npm run format:studio && npm run format:python",
+    "format:check": "npm run format:studio:check && npm run format:python:check",
+    "format:studio": "prettier --write . --ignore-unknown",
+    "format:studio:check": "prettier --check . --ignore-unknown",
+    "format:python": "uv run --project apps/runtime ruff format apps/runtime/src apps/runtime/tests apps/research/src apps/research/tests packages/persistence/src migrations scripts",
+    "format:python:check": "uv run --project apps/runtime ruff format --check apps/runtime/src apps/runtime/tests apps/research/src apps/research/tests packages/persistence/src migrations scripts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.69.0"
+  }
+}
