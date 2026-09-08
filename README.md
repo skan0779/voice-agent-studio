@@ -2,6 +2,10 @@
 
 Voice Agent Studio is a visual workspace for designing, deploying, and monitoring realtime voice agents without editing flow definitions by hand.
 
+<p align="center">
+  <img src="docs/assets/studio-demo.gif" alt="Voice Agent Studio product walkthrough" width="960" />
+</p>
+
 ## Quick Start
 
 The local stack includes PostgreSQL, database migrations, Runtime, Research Agent, and Studio.

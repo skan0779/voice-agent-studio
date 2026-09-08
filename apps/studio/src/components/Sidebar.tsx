@@ -250,11 +250,11 @@ export function Sidebar({
           )}
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-blue-600 text-xs font-bold text-white">
-            SJ
+            VA
           </div>
           <div className={cn("min-w-0", labelClassName)}>
-            <p className="truncate text-xs font-bold text-[var(--text)]">정석환</p>
-            <p className="truncate text-[10px] text-[var(--text-muted)]">seokhwan.jung@kt.com</p>
+            <p className="truncate text-xs font-bold text-[var(--text)]">Studio Admin</p>
+            <p className="truncate text-[10px] text-[var(--text-muted)]">admin@example.com</p>
           </div>
         </div>
       </div>
