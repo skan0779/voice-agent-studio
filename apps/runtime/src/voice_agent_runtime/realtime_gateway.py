@@ -529,7 +529,7 @@ class RealtimeGateway:
         await self.realtime_stop()
 
     def get_transcript(self) -> dict:
-        """Return a structured snapshot for a future DB/research-agent adapter."""
+        """Return a structured snapshot for persistence and observability."""
         return self.transcript.snapshot()
 
     def get_trace(self) -> dict:

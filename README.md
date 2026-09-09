@@ -8,14 +8,14 @@ Voice Agent Studio is a visual workspace for designing, deploying, and monitorin
 
 ## Quick Start
 
-The local stack includes PostgreSQL, database migrations, Runtime, Research Agent, and Studio.
+The local stack includes PostgreSQL, database migrations, Runtime, and Studio.
 
 ```bash
 cp .env.example .env
 npm run local:up
 ```
 
-Open [http://localhost:4173](http://localhost:4173). Runtime and Research Agent are available at ports `8080` and `8081`.
+Open [http://localhost:4173](http://localhost:4173). Runtime is available at port `8080`.
 
 ```bash
 npm run local:logs   # Follow service logs
@@ -31,7 +31,6 @@ npm run lint
 npm run format:check
 npm test
 npm run runtime:test
-npm run research:test
 ```
 
 ## Production Deployment
@@ -40,16 +39,12 @@ Build each service image from the repository root:
 
 ```bash
 docker build -f deploy/Dockerfile.runtime -t voice-agent-studio-runtime:latest .
-docker build -f deploy/Dockerfile.research -t voice-agent-studio-research:latest .
 docker build -f deploy/Dockerfile.studio \
   --build-arg VITE_RUNTIME_API_URL=https://runtime.example.com \
-  --build-arg VITE_RESEARCH_API_URL=https://research.example.com \
   -t voice-agent-studio:latest .
 ```
 
-Use `.env.production.example` as the deployment configuration reference. Inject `DATABASE_URL` and `RUNTIME_SECRET_KEY` through the platform's secret manager, and provide the remaining server variables through its environment configuration. `VITE_RUNTIME_API_URL` and `VITE_RESEARCH_API_URL` are public build arguments embedded in the Studio bundle and must not contain secrets.
-
-Runtime and Research Agent must share the same database and `RUNTIME_SECRET_KEY`. Configure `RESEARCH_AGENT_URL` with the Research Agent's internal service URL and restrict `STUDIO_ORIGINS` to the deployed Studio origin.
+Use `.env.production.example` as the deployment configuration reference. Inject `DATABASE_URL` and `RUNTIME_SECRET_KEY` through the platform's secret manager, and provide the remaining variables through its environment configuration. `VITE_RUNTIME_API_URL` is a public build argument embedded in the Studio bundle and must not contain secrets.
 
 Python Code Actions are disabled by default with `ALLOW_UNSAFE_CODE_ACTIONS=false`. The current subprocess isolation is not a production security sandbox; enable it only in a trusted local environment until an isolated worker is available.
 
@@ -63,31 +58,28 @@ No production Compose file is included. The Dockerfiles are intended for a conta
 
 ## Architecture
 
-| Service        | Responsibility                                                                                                                      |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Studio         | React application for workspace configuration, visual flow editing, deployments, calls, and reports                                 |
-| Runtime        | FastAPI service that persists Studio documents and runs deployed voice-agent flows through Twilio Media Streams and OpenAI Realtime |
-| Research Agent | FastAPI service that performs post-call assessment scoring and transcript-grounded analysis                                         |
-| PostgreSQL     | Shared storage for workspace documents, encrypted provider settings, deployments, calls, and reports                                |
+| Service    | Responsibility                                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Studio     | React application for workspace configuration, visual flow editing, deployments, and call monitoring                                |
+| Runtime    | FastAPI service that persists Studio documents and runs deployed voice-agent flows through Twilio Media Streams and OpenAI Realtime |
+| PostgreSQL | Storage for workspace documents, encrypted provider settings, deployments, calls, transcripts, and runtime state                    |
 
-Studio communicates with Runtime and Research Agent over HTTP. Runtime requests post-call analysis from Research Agent, and both backend services use the same PostgreSQL database. Workspace documents and encrypted provider secrets are stored separately; secret values are never returned to the browser after they are saved.
+Studio communicates with Runtime over HTTP, and Runtime stores application data in PostgreSQL. Workspace documents and encrypted provider secrets are stored separately; secret values are never returned to the browser after they are saved.
 
 ```text
 Browser
   └─ Studio
-      ├─ Runtime ──────── PostgreSQL
-      │    └─ Twilio / OpenAI Realtime
-      └─ Research Agent ─ PostgreSQL
-               └─ OpenAI Responses API
+      └─ Runtime ─ PostgreSQL
+           └─ Twilio / OpenAI Realtime
 ```
 
 ## Using Voice Agent Studio
 
 Create a workspace and configure its Twilio and OpenAI connections in Settings. Provider credentials are encrypted by Runtime using `RUNTIME_SECRET_KEY`. Set `PUBLIC_URL` to an HTTPS address reachable by Twilio, such as a deployed Runtime URL or an ngrok URL during local testing.
 
-Within a workspace, create one or more agents and build each conversation as a visual graph of Start, Node, Tool, and End blocks. Nodes can collect structured values, invoke registered tools, produce audio responses, and transition through conditional, fallback, or timeout edges. Workspace-level assessments, policies, knowledge, contacts, functions, and state are managed in Studio and stored in PostgreSQL.
+Within a workspace, create one or more agents and build each conversation as a visual graph of Start, Node, Tool, and End blocks. Nodes can collect structured values, invoke registered tools, produce audio responses, and transition through conditional, fallback, or timeout edges. Workspace-level data assets, contacts, functions, and state schemas are managed in Studio and stored in PostgreSQL.
 
-Validate the graph before creating a deployment. A deployment captures the executable flow and its referenced data assets so Runtime can execute a stable version independently from later draft edits. Calls and transcripts are available for operational review, while eligible completed calls can be analyzed by Research Agent and reviewed from the Reports page.
+Validate the graph before creating a deployment. A deployment captures the executable flow and its referenced data assets so Runtime can execute a stable version independently from later draft edits. Completed calls, transcripts, and final runtime State are available from Call Records for operational review.
 
 ## License
 

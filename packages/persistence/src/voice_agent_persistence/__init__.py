@@ -3,7 +3,6 @@ from .schema import (
     deployments,
     metadata,
     outbound_calls,
-    research_reports,
     workspace_documents,
     workspace_settings,
 )
@@ -14,7 +13,6 @@ __all__ = [
     "metadata",
     "normalize_database_url",
     "outbound_calls",
-    "research_reports",
     "workspace_documents",
     "workspace_settings",
 ]

@@ -35,7 +35,6 @@ export const defaultEndConfig: EndConfig = {
   playbackTimeoutMs: 8000,
   fallbackGraceMs: 1500,
   saveTranscript: true,
-  triggerResearchAgent: false,
   endReason: "completed",
 };
 

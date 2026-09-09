@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 class RuntimeSettings:
     database_url: str
     allow_unsafe_code_actions: bool = False
-    research_agent_url: str | None = None
     secret_encryption_key: str = "local-development-only-change-me"
     cors_origins: tuple[str, ...] = (
         "http://localhost:4173",
@@ -28,7 +27,6 @@ class RuntimeSettings:
                 "postgresql+psycopg://voice_agent_studio:local-voice-agent-studio-password@localhost:5432/voice_agent_studio",
             ),
             allow_unsafe_code_actions=os.getenv("ALLOW_UNSAFE_CODE_ACTIONS", "").lower() in {"1", "true", "yes"},
-            research_agent_url=(os.getenv("RESEARCH_AGENT_URL", "http://127.0.0.1:8081").rstrip("/") or None),
             secret_encryption_key=os.getenv("RUNTIME_SECRET_KEY", "local-development-only-change-me"),
             cors_origins=tuple(
                 origin.strip()

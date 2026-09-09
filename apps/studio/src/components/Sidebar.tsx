@@ -3,7 +3,6 @@ import {
   ChevronDown,
   CircleHelp,
   Database,
-  FileChartColumn,
   LayoutDashboard,
   Library,
   MemoryStick,
@@ -29,7 +28,6 @@ export type SectionId =
   | "contacts"
   | "live"
   | "calls"
-  | "reports"
   | "tools"
   | "functions"
   | "state"
@@ -56,7 +54,6 @@ const primaryItems: Array<{
   { id: "contacts", label: "Contacts", icon: UsersRound },
   { id: "live", label: "Call Live", icon: Radio },
   { id: "calls", label: "Call Records", icon: MessageSquareText },
-  { id: "reports", label: "Reports", icon: FileChartColumn },
 ];
 
 export interface SidebarCounts {
@@ -69,7 +66,6 @@ export interface SidebarCounts {
   contacts: number;
   live: number;
   calls: number;
-  reports: number;
 }
 
 const SIDEBAR_COLLAPSED_KEY = "voice-agent-studio.sidebar-collapsed";

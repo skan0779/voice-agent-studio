@@ -13,6 +13,17 @@ describe("flow migration", () => {
     expect(start.data.startConfig?.turnDetection.createResponse).toBe(false);
   });
 
+  it("removes the legacy Research Agent option from End blocks", () => {
+    const legacy = structuredClone(fixtureFlow) as any;
+    const end = legacy.nodes.find((node: any) => node.data.kind === "end");
+    end.data.endConfig.triggerResearchAgent = true;
+
+    const migrated = migrateFlow(legacy, fixtureFlow);
+    const migratedEnd = migrated.nodes.find((node) => node.data.kind === "end")!;
+
+    expect(migratedEnd.data.endConfig).not.toHaveProperty("triggerResearchAgent");
+  });
+
   it("converts legacy Node modes into editable runtime settings", () => {
     const legacy = structuredClone(fixtureFlow) as unknown as Record<string, any>;
     const collector = legacy.nodes.find((node: Record<string, any>) => node.data.kind === "node");

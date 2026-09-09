@@ -80,7 +80,6 @@ export interface EndConfig {
   playbackTimeoutMs: number;
   fallbackGraceMs: number;
   saveTranscript: boolean;
-  triggerResearchAgent: boolean;
   endReason: "completed" | "declined" | "timeout" | "safety";
 }
 

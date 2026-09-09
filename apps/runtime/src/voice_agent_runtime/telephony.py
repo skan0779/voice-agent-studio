@@ -4,8 +4,6 @@ import asyncio
 import json
 from typing import Any, Callable
 from urllib.parse import quote
-from urllib.request import Request as UrlRequest
-from urllib.request import urlopen
 from xml.sax.saxutils import quoteattr
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect, status
@@ -49,24 +47,6 @@ def _stream_twiml(public_url: str, token: str, deployment_id: str) -> str:
 """
 
 
-async def _request_post_call_analysis(research_agent_url: str, call_id: str) -> None:
-    request = UrlRequest(
-        f"{research_agent_url}/api/reports/analyze/{quote(call_id)}",
-        data=b"",
-        method="POST",
-    )
-    try:
-
-        def send() -> None:
-            with urlopen(request, timeout=3) as response:
-                response.read()
-
-        await asyncio.to_thread(send)
-    except Exception as exc:
-        # Research analysis is best-effort and must never affect call cleanup.
-        print(f"[Research agent trigger error] {type(exc).__name__}: {exc}")
-
-
 def create_telephony_router(
     repository: RuntimeRepository,
     settings: RuntimeSettings,
@@ -74,7 +54,6 @@ def create_telephony_router(
     twilio_client_factory: Callable[[str, str], Any] = _default_twilio_client,
 ) -> APIRouter:
     router = APIRouter()
-    research_tasks: set[asyncio.Task[None]] = set()
 
     @router.get("/call-records", response_model=list[CallRecordSummary])
     async def list_call_records(workspace_id: str) -> list[CallRecordSummary]:
@@ -315,10 +294,6 @@ def create_telephony_router(
                 ],
                 flow_completed=gateway.orchestrator.is_complete,
             )
-            if final_status == "completed" and settings.research_agent_url:
-                task = asyncio.create_task(_request_post_call_analysis(settings.research_agent_url, call["id"]))
-                research_tasks.add(task)
-                task.add_done_callback(research_tasks.discard)
             if scoped_event_stream is not None:
                 scoped_event_stream.emit(
                     "call_ended",

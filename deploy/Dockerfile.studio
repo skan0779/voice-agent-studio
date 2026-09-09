@@ -10,14 +10,11 @@ RUN npm ci
 COPY apps/studio/ ./apps/studio/
 
 ARG VITE_RUNTIME_API_URL
-ARG VITE_RESEARCH_API_URL
 
-ENV VITE_RUNTIME_API_URL=${VITE_RUNTIME_API_URL} \
-    VITE_RESEARCH_API_URL=${VITE_RESEARCH_API_URL}
+ENV VITE_RUNTIME_API_URL=${VITE_RUNTIME_API_URL}
 
 # Vite embeds these endpoints into the browser bundle at build time.
 RUN test -n "${VITE_RUNTIME_API_URL}" \
-    && test -n "${VITE_RESEARCH_API_URL}" \
     && npm run build
 
 FROM nginx:1.27-alpine

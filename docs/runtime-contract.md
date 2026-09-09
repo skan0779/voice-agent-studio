@@ -92,7 +92,7 @@ End는 마지막 Audio 응답이 생성되었다는 사실만으로 즉시 통�
 1. Twilio로 마지막 media 뒤에 mark를 전송합니다.
 2. mark acknowledgement를 기다립니다.
 3. `playback_timeout_ms` 내 ack가 없을 때만 `fallback_grace_ms` 후 종료합니다.
-4. Transcript를 고정하고 Research Agent 작업을 enqueue합니다.
+4. Transcript와 최종 State를 고정하여 Call Record에 저장합니다.
 
 이 방식은 정상 경로에서 문장 끝이 잘리는 것을 막으면서, 네트워크 이상 시 통화가 무기한 남는 것도 방지합니다.
 

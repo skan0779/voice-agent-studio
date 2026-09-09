@@ -253,7 +253,6 @@
         "playback_timeout_ms",
         "fallback_grace_ms",
         "save_transcript",
-        "trigger_research_agent",
         "end_reason"
       ],
       "properties": {
@@ -262,7 +261,6 @@
         "playback_timeout_ms": { "type": "integer", "minimum": 0 },
         "fallback_grace_ms": { "type": "integer", "minimum": 0 },
         "save_transcript": { "type": "boolean" },
-        "trigger_research_agent": { "type": "boolean" },
         "end_reason": { "enum": ["completed", "declined", "timeout", "safety"] }
       },
       "additionalProperties": false

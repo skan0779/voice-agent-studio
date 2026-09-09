@@ -17,7 +17,7 @@ describe("agent flows", () => {
     expect(agent.edges[0]).toMatchObject({ source: agent.nodes[0].id, target: agent.nodes[1].id });
     expect(agent.edges).toHaveLength(1);
     expect(agent.nodes[0].data.startConfig?.baseInstructions).not.toContain("온콜");
-    expect(agent.nodes[1].data.endConfig?.triggerResearchAgent).toBe(false);
+    expect(agent.nodes[1].data.endConfig?.saveTranscript).toBe(true);
   });
 
   it("preserves an intentionally empty agent library", () => {

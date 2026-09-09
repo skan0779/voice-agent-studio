@@ -42,27 +42,9 @@ services:
     environment:
       <<: *database-environment
       ALLOW_UNSAFE_CODE_ACTIONS: ${ALLOW_UNSAFE_CODE_ACTIONS:-false}
-      RESEARCH_AGENT_URL: http://research:8081
       STUDIO_ORIGINS: ${STUDIO_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
     ports:
       - "8080:8080"
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-      research:
-        condition: service_healthy
-
-  research:
-    build:
-      context: .
-      dockerfile: deploy/Dockerfile.research
-    restart: unless-stopped
-    environment:
-      <<: *database-environment
-      RESEARCH_MODEL: ${RESEARCH_MODEL:-gpt-5.6-terra}
-      STUDIO_ORIGINS: ${STUDIO_ORIGINS:-http://localhost:4173,http://127.0.0.1:4173}
-    ports:
-      - "8081:8081"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -73,14 +55,11 @@ services:
       dockerfile: deploy/Dockerfile.studio
       args:
         VITE_RUNTIME_API_URL: http://localhost:8080
-        VITE_RESEARCH_API_URL: http://localhost:8081
     restart: unless-stopped
     ports:
       - "4173:80"
     depends_on:
       runtime:
-        condition: service_healthy
-      research:
         condition: service_healthy
 
 volumes:

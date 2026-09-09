@@ -124,13 +124,21 @@ function migrateNodeData(data: Record<string, any>, agent: Record<string, any>):
   }
 
   if (data.kind === "end") {
+    const current = data.endConfig ?? {};
     return {
       ...data,
       kind: "end",
       responseMode: "none",
       toolChoice: "none",
       toolIds: data.toolIds ?? [],
-      endConfig: { ...defaultEndConfig, ...(data.endConfig ?? {}) },
+      endConfig: {
+        finalMessage: current.finalMessage ?? defaultEndConfig.finalMessage,
+        waitForPlaybackMark: current.waitForPlaybackMark ?? defaultEndConfig.waitForPlaybackMark,
+        playbackTimeoutMs: current.playbackTimeoutMs ?? defaultEndConfig.playbackTimeoutMs,
+        fallbackGraceMs: current.fallbackGraceMs ?? defaultEndConfig.fallbackGraceMs,
+        saveTranscript: current.saveTranscript ?? defaultEndConfig.saveTranscript,
+        endReason: current.endReason ?? defaultEndConfig.endReason,
+      },
     } as VoiceNodeData;
   }
 

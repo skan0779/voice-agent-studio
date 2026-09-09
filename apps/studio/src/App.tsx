@@ -18,7 +18,6 @@ import { Sidebar, type SectionId } from "./components/Sidebar";
 import { TopHeader } from "./components/TopHeader";
 import { OverviewScreen } from "./components/screens/OverviewScreen";
 import { CallsScreen } from "./components/screens/CallsScreen";
-import { ReportsScreen } from "./components/screens/ReportsScreen";
 import { ContactsScreen } from "./components/screens/ContactsScreen";
 import { CallLiveScreen } from "./components/screens/CallLiveScreen";
 import { ToolsScreen } from "./components/screens/ToolsScreen";
@@ -39,13 +38,10 @@ import {
   deployAgent,
   deleteWorkspaceDocument,
   listCallRecords,
-  listReports,
   listWorkspaceDocuments,
   saveWorkspaceDocument,
   saveWorkspaceSettings,
   startOutboundCall,
-  subscribeToReportEvents,
-  type ResearchReportEvent,
 } from "./lib/runtimeApi";
 
 const ACTIVE_WORKSPACE_KEY = "voice-agent-studio.active-workspace.v1";
@@ -118,8 +114,6 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [runtimeCallCount, setRuntimeCallCount] = useState(0);
   const [runtimeLiveCallCount, setRuntimeLiveCallCount] = useState(0);
-  const [runtimeReportCount, setRuntimeReportCount] = useState(0);
-  const [latestReportEvent, setLatestReportEvent] = useState<ResearchReportEvent | null>(null);
   const lastWorkspaceSnapshotRef = useRef("");
   const workspaceSaveQueueRef = useRef<Promise<void>>(Promise.resolve());
 
@@ -139,22 +133,6 @@ export default function App() {
     }
   }, []);
 
-  const refreshReportCount = useCallback(async (workspaceId: string, cancelled?: () => boolean) => {
-    try {
-      const reports = await listReports(workspaceId);
-      if (cancelled?.()) return;
-      setRuntimeReportCount(reports.filter((report) => report.status === "completed").length);
-    } catch {
-      if (cancelled?.()) return;
-      setRuntimeReportCount(0);
-    }
-  }, []);
-
-  const refreshRuntimeCounts = useCallback(
-    (workspaceId: string, cancelled?: () => boolean) =>
-      Promise.all([refreshCallCounts(workspaceId, cancelled), refreshReportCount(workspaceId, cancelled)]),
-    [refreshCallCounts, refreshReportCount],
-  );
   const activeWorkspace = useMemo(
     () => workspaces.find((workspace) => workspace.id === activeWorkspaceId) ?? workspaces[0] ?? null,
     [activeWorkspaceId, workspaces],
@@ -265,11 +243,10 @@ export default function App() {
     if (!activeWorkspace) {
       setRuntimeCallCount(0);
       setRuntimeLiveCallCount(0);
-      setRuntimeReportCount(0);
       return;
     }
     let cancelled = false;
-    const refreshCounts = () => void refreshRuntimeCounts(activeWorkspace.id, () => cancelled);
+    const refreshCounts = () => void refreshCallCounts(activeWorkspace.id, () => cancelled);
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") refreshCounts();
     };
@@ -279,20 +256,7 @@ export default function App() {
       cancelled = true;
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [activeWorkspace?.id, refreshRuntimeCounts]);
-
-  useEffect(() => {
-    if (!activeWorkspace) {
-      setLatestReportEvent(null);
-      return;
-    }
-    return subscribeToReportEvents(activeWorkspace.id, {
-      onEvent: (event) => {
-        setLatestReportEvent(event);
-        if (event.event === "report_completed") void refreshReportCount(activeWorkspace.id);
-      },
-    });
-  }, [activeWorkspace?.id, refreshReportCount]);
+  }, [activeWorkspace?.id, refreshCallCounts]);
 
   const publish = async () => {
     if (!activeAgent || !activeWorkspace) return;
@@ -731,7 +695,6 @@ export default function App() {
           contacts: activeWorkspace?.contacts.length ?? 0,
           live: runtimeLiveCallCount,
           calls: runtimeCallCount,
-          reports: runtimeReportCount,
         }}
         onChange={changeSection}
         onOpenWorkspaces={() => {
@@ -835,14 +798,6 @@ export default function App() {
                 workspaceId={activeWorkspace.id}
                 contacts={activeWorkspace.contacts}
                 onCountChange={setRuntimeCallCount}
-              />
-            )}
-            {section === "reports" && activeWorkspace && (
-              <ReportsScreen
-                workspaceId={activeWorkspace.id}
-                contacts={activeWorkspace.contacts}
-                reportEvent={latestReportEvent}
-                onCountChange={setRuntimeReportCount}
               />
             )}
             {section === "tools" && activeWorkspace && (

@@ -3,7 +3,6 @@ import {
   Braces,
   Check,
   Database,
-  FileChartColumn,
   MemoryStick,
   MessageSquareText,
   PhoneCall,
@@ -489,8 +488,7 @@ const operateTopics: HelpTopic[] = [
   {
     section: "calls",
     title: "Call Records",
-    description:
-      "Inspect historical calls and download the exact transcript and final runtime State used for review and research.",
+    description: "Inspect historical calls and download the exact transcript and final runtime State used for review.",
     icon: MessageSquareText,
     prerequisite:
       "A Runtime call must have reached a stored lifecycle state. Completed, failed, declined, safety, and incomplete calls can all appear here.",
@@ -536,62 +534,6 @@ const operateTopics: HelpTopic[] = [
         { label: "Contact", value: "정석환  ·  010-4871-0779" },
         { label: "Call", value: "On Call Agent  ·  08:42  ·  18 turns" },
         { label: "Downloads", value: "Transcript JSON  ·  State JSON" },
-      ],
-    },
-  },
-  {
-    section: "reports",
-    title: "Reports",
-    description:
-      "Review post-call mental-health findings generated from eligible transcripts, deterministic scores, and longitudinal history.",
-    icon: FileChartColumn,
-    prerequisite:
-      "The call must be completed and have no pending Review outcome. Research processing begins after the Runtime finalizes the call.",
-    steps: [
-      {
-        title: "Wait for analysis",
-        control: "Report status",
-        description:
-          "The report moves from queued to running and then completed. Studio receives completion events automatically.",
-        result: "The Reports badge and list update without continuous polling.",
-      },
-      {
-        title: "Select a report",
-        control: "Report row",
-        description: "Choose a completed report by Contact, call date, or Agent.",
-        result: "The structured research result opens.",
-      },
-      {
-        title: "Review assessment findings",
-        control: "Domain findings",
-        description: "Check deterministic PHQ, GAD, and social-connection results together with transcript evidence.",
-        result: "Every finding can be traced to stored call information.",
-      },
-      {
-        title: "Review risk and limitations",
-        control: "Risk / Evidence",
-        description:
-          "Read risk indicators, uncertainty, missing information, and the report disclaimer before interpretation.",
-        result: "The report is used as decision support rather than a clinical diagnosis.",
-      },
-      {
-        title: "Compare prior calls",
-        control: "History",
-        description: "Use the Contact's prior eligible reports to inspect score and evidence changes over time.",
-        result: "Longitudinal change is visible instead of relying on one call alone.",
-      },
-    ],
-    note: "Safety, declined, and incomplete calls remain available in Call Records but are excluded from normal automated report generation.",
-    preview: {
-      title: "Mental Health Report",
-      status: "Completed",
-      statusTone: "green",
-      tabs: ["Summary", "Assessments", "Evidence", "History"],
-      activeTab: "Assessments",
-      rows: [
-        { label: "PHQ", value: "2  ·  Minimal" },
-        { label: "GAD", value: "1  ·  Minimal" },
-        { label: "Social connection", value: "Stable  ·  No notable decline" },
       ],
     },
   },

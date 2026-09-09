@@ -100,7 +100,6 @@ export function serializeFlow(flow: FlowDocument, overrides: Partial<Pick<FlowDo
             playback_timeout_ms: node.data.endConfig.playbackTimeoutMs,
             fallback_grace_ms: node.data.endConfig.fallbackGraceMs,
             save_transcript: node.data.endConfig.saveTranscript,
-            trigger_research_agent: node.data.endConfig.triggerResearchAgent,
             end_reason: node.data.endConfig.endReason,
           }
         : undefined,

@@ -75,100 +75,9 @@ export interface RuntimeLiveEvent {
   };
 }
 
-export interface ResearchReportEvent {
-  sequence: number;
-  event: "report_queued" | "report_running" | "report_completed" | "report_failed";
-  data: {
-    workspace_id: string;
-    call_id: string;
-    report_id: string;
-    status: "queued" | "running" | "completed" | "failed";
-    error?: string;
-  };
-}
-
-export interface AssessmentAnswer {
-  item_id: string;
-  prompt: string;
-  response_id: string;
-  response_label: string;
-  score: number;
-}
-
-export interface AssessmentResult {
-  key: string;
-  title: string;
-  form: string;
-  score: number;
-  maximum: number;
-  classification: string;
-  complete: boolean;
-  answered_count: number;
-  required_count: number;
-  answers: AssessmentAnswer[];
-  domain_scores: Record<string, number>;
-}
-
-export interface ReportListItem {
-  id: string | null;
-  call_id: string;
-  call_sid: string | null;
-  workspace_id: string;
-  agent_id: string;
-  agent_name: string;
-  contact_id: string | null;
-  contact_name: string;
-  contact_photo_data_url: string | null;
-  to_number: string;
-  call_started_at: string | null;
-  status: "not_started" | "queued" | "running" | "completed" | "failed";
-  generated_at: string | null;
-  priority: "low" | "monitor" | "review" | null;
-  summary: string | null;
-  assessments: AssessmentResult[];
-  error: string | null;
-}
-
-export interface ResearchReport extends Omit<
-  ReportListItem,
-  "status" | "generated_at" | "priority" | "summary" | "assessments" | "error"
-> {
-  id: string;
-  generated_at: string;
-  model: string;
-  analysis_mode: "model" | "deterministic_fallback";
-  priority: "low" | "monitor" | "review";
-  summary: string;
-  data_quality: "sufficient" | "limited";
-  assessments: AssessmentResult[];
-  evidence: Array<{
-    domain: "mood" | "anxiety" | "social_connection" | "daily_life" | "protective_factor";
-    finding: string;
-    quote: string;
-    turn_id: string;
-  }>;
-  strengths: string[];
-  concerns: string[];
-  longitudinal: Array<{
-    assessment_key: string;
-    form: string;
-    previous_score: number;
-    current_score: number;
-    delta: number;
-    direction: "improved" | "stable" | "worsened";
-    previous_call_id: string;
-  }>;
-  disclaimer: string;
-}
-
 function runtimeBaseUrl() {
   const configured = import.meta.env.VITE_RUNTIME_API_URL;
   return (configured || "http://localhost:8080").replace(/\/$/, "");
-}
-
-function researchBaseUrl() {
-  const configured = import.meta.env.VITE_RESEARCH_API_URL;
-  return (configured || "http://localhost:8081").replace(/\/$/, "");
 }
 
 async function runtimeRequest<T>(path: string, init: RequestInit, timeoutMs?: number): Promise<T> {
@@ -196,25 +105,6 @@ async function runtimeRequest<T>(path: string, init: RequestInit, timeoutMs?: nu
     throw new Error(detail);
   }
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
-}
-
-async function researchRequest<T>(path: string, init: RequestInit): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(`${researchBaseUrl()}${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...init.headers },
-    });
-  } catch {
-    throw new Error("Could not reach the Research Agent.");
-  }
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as { detail?: unknown } | null;
-    throw new Error(
-      typeof payload?.detail === "string" ? payload.detail : `Research request failed (${response.status}).`,
-    );
-  }
   return response.json() as Promise<T>;
 }
 
@@ -315,30 +205,6 @@ export function deleteCallRecord(callId: string) {
   return runtimeRequest<void>(`/api/call-records/${encodeURIComponent(callId)}`, { method: "DELETE" });
 }
 
-export function listReports(workspaceId: string) {
-  return researchRequest<ReportListItem[]>(`/api/reports?workspace_id=${encodeURIComponent(workspaceId)}`, {
-    method: "GET",
-  });
-}
-
-export function getReport(reportId: string) {
-  return researchRequest<ResearchReport>(`/api/reports/${encodeURIComponent(reportId)}`, { method: "GET" });
-}
-
-export function analyzeCall(callId: string, force = false) {
-  return researchRequest<{ call_id: string; status: "queued" | "already_completed" }>(
-    `/api/reports/analyze/${encodeURIComponent(callId)}?force=${force}`,
-    { method: "POST" },
-  );
-}
-
-export function analyzePendingReports(workspaceId: string) {
-  return researchRequest<{ queued: number }>(
-    `/api/reports/analyze-pending?workspace_id=${encodeURIComponent(workspaceId)}`,
-    { method: "POST" },
-  );
-}
-
 export function subscribeToLiveEvents(
   workspaceId: string,
   handlers: {
@@ -356,28 +222,6 @@ export function subscribeToLiveEvents(
       handlers.onEvent(JSON.parse(message.data) as RuntimeLiveEvent);
     } catch {
       // Ignore malformed observability events without interrupting the call UI.
-    }
-  };
-  return () => source.close();
-}
-
-export function subscribeToReportEvents(
-  workspaceId: string,
-  handlers: {
-    onEvent: (event: ResearchReportEvent) => void;
-    onOpen?: () => void;
-    onError?: () => void;
-  },
-) {
-  const url = `${researchBaseUrl()}/api/report-events?workspace_id=${encodeURIComponent(workspaceId)}`;
-  const source = new EventSource(url);
-  source.onopen = () => handlers.onOpen?.();
-  source.onerror = () => handlers.onError?.();
-  source.onmessage = (message) => {
-    try {
-      handlers.onEvent(JSON.parse(message.data) as ResearchReportEvent);
-    } catch {
-      // Ignore malformed lifecycle events and recover from the next event or page load.
     }
   };
   return () => source.close();

@@ -10,7 +10,6 @@ const titles: Record<SectionId, { title: string; eyebrow: string }> = {
   contacts: { title: "Contacts", eyebrow: "Call Recipients" },
   live: { title: "Call Live", eyebrow: "Realtime Monitoring" },
   calls: { title: "Call Records", eyebrow: "Observability" },
-  reports: { title: "Reports", eyebrow: "Post-call Research" },
   tools: { title: "Tools", eyebrow: "Agent capabilities" },
   functions: { title: "Functions", eyebrow: "Service runtime" },
   state: { title: "State", eyebrow: "Service runtime" },

@@ -92,27 +92,3 @@ workspace_settings = Table(
     Column("openai_api_key_encrypted", Text, nullable=False),
     Column("updated_at", String(40), nullable=False),
 )
-
-
-research_reports = Table(
-    "research_reports",
-    metadata,
-    Column("id", String(80), primary_key=True),
-    Column(
-        "call_id",
-        String(80),
-        ForeignKey("outbound_calls.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-    ),
-    Column("workspace_id", String(200), nullable=False),
-    Column("contact_id", String(200)),
-    Column("status", String(40), nullable=False),
-    Column("model", String(200), nullable=False),
-    Column("report_json", json_document),
-    Column("error", Text),
-    Column("created_at", String(40), nullable=False),
-    Column("updated_at", String(40), nullable=False),
-)
-Index("idx_research_reports_workspace", research_reports.c.workspace_id, research_reports.c.updated_at)
-Index("idx_research_reports_contact", research_reports.c.contact_id, research_reports.c.updated_at)
