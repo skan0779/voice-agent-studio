@@ -83,4 +83,4 @@ Validate the graph before creating a deployment. A deployment captures the execu
 
 ## License
 
-Copyright 2026 skan0779. Licensed under the [Apache License 2.0](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).
